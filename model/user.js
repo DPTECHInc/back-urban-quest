@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // const postSchema = new mongoose.Schema({});
 
-const registerSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     nom: String,
     prenom: String,
     naissance: Date,
@@ -11,4 +11,4 @@ const registerSchema = new mongoose.Schema({
     password: String,
 });
 
-module.exports = mongoose.model("data", registerSchema);
+module.exports = User = mongoose.model("users", UserSchema);

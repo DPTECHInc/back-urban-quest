@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var data = require("../model/modelPost");
+var data = require("../model/post");
 
 const registerPost = {
     RegisterDataPost: (req, res, next) => {
