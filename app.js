@@ -5,7 +5,7 @@ var logger = require("morgan");
 const mongoose = require("mongoose");
 require("dotenv").config({ path: "./.env" });
 
-var indexRouter = require("./routes/index");
+var postsRouter = require("./routes/posts");
 var usersRouter = require("./routes/users");
 
 var app = express();
@@ -22,7 +22,7 @@ mongoose
     .then(() => console.log("Mongo Database connected to " + process.env.mongoURI))
     .catch((err) => console.log(err));
 
-app.use("/", indexRouter);
-app.use("/", usersRouter);
+app.use(postsRouter);
+app.use(usersRouter);
 
 module.exports = app;

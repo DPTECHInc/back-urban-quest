@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 
-router.post("/register", function (req, res, next) {
-    res.status(200).json("soon Register user");
-});
+const register = require("../controllers/register");
+
+router.post("/register", register.RegisterDataPost);
 
 router.post("/login", function (req, res, next) {
     res.status(200).json("soon log-in");

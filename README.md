@@ -219,7 +219,7 @@ Requête:
     "nom": "String",
     "prenom": "String",
     "pseudo": "String",
-    "dateOfBirth": "String",
+    "naissance": "String",
     "email": "String",
     "password": "String"
 }
@@ -302,7 +302,7 @@ status `200`
     "email": "your@mail.com",
     "nom": "dupont",
     "prenom": "Paul",
-    "dateOfBirth": "1999/12/31"
+    "naissance": "1999/12/31"
 }
 ```
 
@@ -364,8 +364,13 @@ status `403`
 
 // Le compte d’un user
 
+-   nom
+-   prenom
+-   pseudo
+-   naissance
 -   email
--   posts perso [ ]
+-   password
+-   posts
 
 ## Post
 
@@ -373,7 +378,7 @@ status `403`
 
 -   nom: "string" “Titre du point d'intérêt à trouver”
 -   contenu: string "Des info sur ce point ..",
--   catégorie: string “urbex”, “balade”, … (à définir),
+-   categorie: string “urbex”, “balade”, … (à définir),
 -   location: {lat: 42.15, lon: 22.2}
--   like counter: "0",
+-   likes: "0",
 -   comment: "string"
