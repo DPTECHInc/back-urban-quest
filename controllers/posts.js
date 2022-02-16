@@ -1,7 +1,5 @@
 //const Post = require("../models/Post");
 
-let fakeDatas = require("../fakeDatas/posts.json");
-
 let Post = require("../model/post");
 
 /**
