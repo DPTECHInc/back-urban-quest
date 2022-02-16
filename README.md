@@ -146,11 +146,11 @@ status `200`
 }
 ```
 
-status `204`
+status `200`
 
 ```json
 {
-    "message": "Vous aviez déjà liké ce post"
+    "message": "Vous ne liké plus ce post"
 }
 ```
 
@@ -166,7 +166,7 @@ status `403`
 
 ```json
 {
-    "message": "Ce serait tyrop facile de liker son propre contenu ;)"
+    "message": "Ce serait trop facile de liker son propre contenu ;)"
 }
 ```
 
@@ -178,8 +178,8 @@ Requête:
 
 ```json
 {
-    "id":"String" // Id du post à commenter
-    "text":"String", // le jolie commentaire
+    "id": "String", // Id du post à commenter
+    "text": "String" // le jolie commentaire
 }
 ```
 
