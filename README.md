@@ -43,7 +43,7 @@ Exemple de retour:
             "nom": "string",
             "contenu": "contenu",
             "categorie": "urbex",
-            "location": {"lat": 12.3743, "long":39.4494},
+            "location": {"lat": 12.3743, "lon":39.4494},
             "like_counter": "",
             "comments":[{
                 todef
@@ -64,7 +64,7 @@ Requête
     "nom": "string",
     "contenu": "contenu",
     "categorie": "urbex",
-    "location": { "lat": 13.234, "long": 85.74548 }
+    "location": { "lat": 13.234, "lon": 85.74548 }
 }
 ```
 
@@ -381,4 +381,4 @@ status `403`
 -   categorie: string “urbex”, “balade”, … (à définir),
 -   location: {lat: 42.15, lon: 22.2}
 -   likes: "0",
--   comment: "string"
+-   comments: Array
