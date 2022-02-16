@@ -1,20 +1,14 @@
 var express = require("express");
 var router = express.Router();
 
-const register = require("../controllers/register");
+const userController = require("../controllers/user");
 
-router.post("/register", register.RegisterDataPost);
+router.post("/register", userController.RegisterDataPost);
 
-router.post("/login", function (req, res, next) {
-    res.status(200).json("soon log-in");
-});
+router.post("/login", userController.loginDataGet);
 
-router.get("/profil", function (req, res, next) {
-    res.status(200).json("soon your account infos");
-});
+router.get("/profil", userController.profilDataGet);
 
-router.put("/profil", function (req, res, next) {
-    res.status(200).json("soon update your account infos");
-});
+router.put("/profil", userController.profilDataPut);
 
 module.exports = router;
