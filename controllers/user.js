@@ -27,6 +27,7 @@ const registerPost = {
         } else {
             user.findOne({ email: RegisterData.email }, (error, data) => {
                 if (error) {
+                    console.log(error);
                     res.status(500).json({ message: "Une erreur s'est produite" });
                 } else if (data != null) {
                     res.status(422).json({ message: "Cet email est déjà enregistré" });
@@ -35,6 +36,7 @@ const registerPost = {
 
                     userToRegister.save({}, (error, data) => {
                         if (error) {
+                            console.log(error);
                             res.status(500).json({ message: "Une erreur s'est produite" });
                         } else {
                             res.status(200).json({ message: "User Register", newUser: data });
@@ -75,17 +77,23 @@ const registerPost = {
     },
 
     profilDataPut: (req, res, next) => {
-        let newValue = req.body.plop;
+        let newValueNom = req.body.nom;
+        let newValuePrenom = req.body.prenom;
+        let newValueNaissance = req.body.naissance;
+        let newValuePseudo = req.body.pseudo;
 
-        user.update(
-            { _id: req.params.id },
-            {
-                nom: req.body.nom,
-                prenom: req.body.prenom,
-                naissance: req.body.naissance,
+        user.updateOne(
+            { nom: newValueNom, prenom: newValuePrenom, naissance: newValueNaissance, pseudo: newValuePseudo },
+            (error, data) => {
+                if (error) {
+                    res.status(500).json({ message: "Une erreur s'est produite" });
+                } else if (data === null) {
+                    res.status(422).json({ message: "L'un des champ requis est vide" });
+                } else {
+                    res.status(200).json({ message: "Votre profil a bien été modifié", ProfilUpdated: req.body });
+                }
             }
         );
-        res.status(200).json({ message: "TO DO//EN COURS" });
     },
 };
 
