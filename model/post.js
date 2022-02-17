@@ -5,10 +5,8 @@ const PostSchema = new mongoose.Schema({
     contenu: String,
     categorie: String,
     location: {},
-    likes: { type: Number, default: 0 },
-    comments: { type: Array, default: [] },
-    // https://mongoosejs.com/docs/schematypes.html
-    updated: { type: Date, default: Date.now },
+    likes: Number,
+    comments: Array,
 });
 
 module.exports = Post = mongoose.model("posts", PostSchema);
