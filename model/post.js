@@ -4,9 +4,10 @@ const PostSchema = new mongoose.Schema({
     nom: String,
     contenu: String,
     categorie: String,
-    location: {},
+    location: String,
     likes: { type: Number, default: 0 },
     comments: { type: Array, default: [] },
+    // pictures: ,
     // https://mongoosejs.com/docs/schematypes.html
     updated: { type: Date, default: Date.now },
 });
