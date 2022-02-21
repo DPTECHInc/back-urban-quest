@@ -1,12 +1,14 @@
 var express = require("express");
 var router = express.Router();
-var user = require("../model/user");
+var User = require("../model/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const registerPost = {
-    RegisterDataPost: (req, res, next) => {
+    register: async (req, res, next) => {
         console.log(req.body);
 
-        let RegisterData = {
+        let registerData = {
             nom: req.body.nom,
             prenom: req.body.prenom,
             naissance: req.body.naissance,
@@ -16,49 +18,73 @@ const registerPost = {
         };
 
         if (
-            !RegisterData.nom ||
-            !RegisterData.prenom ||
-            !RegisterData.naissance ||
-            !RegisterData.pseudo ||
-            !RegisterData.email ||
-            !RegisterData.password
+            !registerData.nom ||
+            !registerData.prenom ||
+            !registerData.naissance ||
+            !registerData.pseudo ||
+            !registerData.email ||
+            !registerData.password
         ) {
-            res.status(422).json({ message: "l'un des champ requis est vide" });
-        } else {
-            user.findOne({ email: RegisterData.email }, (error, data) => {
-                if (error) {
-                    console.log(error);
-                    res.status(500).json({ message: "Une erreur s'est produite" });
-                } else if (data != null) {
-                    res.status(422).json({ message: "Cet email est déjà enregistré" });
-                } else {
-                    const userToRegister = new user(RegisterData);
-
-                    userToRegister.save({}, (error, data) => {
-                        if (error) {
-                            console.log(error);
-                            res.status(500).json({ message: "Une erreur s'est produite" });
-                        } else {
-                            res.status(200).json({ message: "User Register", newUser: data });
-                        }
-                    });
-                }
-            });
+            return res.status(422).json({ message: "l'un des champ requis est vide" });
         }
+
+        registerData.password = await bcrypt.hash(registerData.password, 10);
+
+        const userToRegister = new User(registerData);
+        userToRegister.save({}, (error, savedUserInDB) => {
+            if (error) {
+                if (/*error.name === "ValidationError" && */ error.keyPattern.email) {
+                    // error.keyValue == "email" => email déjà enregistré
+                    // exemple d'erreur
+                    // Object
+                    //      index	0
+                    //      code	11000
+                    //      keyPattern	{
+                    //              email: 1                    <===== GRrrr !
+                    // }
+                    //      email	1
+                    //      keyValue	Object { email: "ps@mail.com" }
+                    //      email	"ps@mail.com"
+                    return res.status(422).json({ message: "Cet email est déjà enregistré" });
+                }
+                return res.status(500).json({ message: "Une erreur s'est produite", error });
+            }
+            // need create a token for this new user
+            // Génération du JWT
+            jwt.sign({ userId: savedUserInDB._id }, process.env.SECRET, { expiresIn: "1h" }, (err, token) => {
+                if (err) {
+                    return res.status(500).json({ message: "Une erreur s'est produite" });
+                }
+                return res.status(200).json({ message: "User Registered", user: savedUserInDB, token });
+            });
+        });
     },
 
-    loginDataGet: (req, res, next) => {
-        let email = req.body.email;
-        let password = req.body.password;
+    login: (req, res, next) => {
+        /* Body */
+        let { email, password } = req.body;
 
-        user.findOne({ email: email, password: password }, (error, data) => {
+        /* Recherche de l'utilisateur */
+        User.findOne({ email: email }, async (error, data) => {
             if (error) {
-                res.status(500).json({ message: "Une erreur s'est produite" });
-            } else if (data === null) {
-                res.status(401).json({ message: "Email ou mot de passe invalide" });
-            } else {
-                res.status(200).json(data);
+                return res.status(500).json({ message: "Une erreur s'est produite" });
             }
+            if (data === null) {
+                // user non trouvé (email non enregistré dans la DB)
+                return res.status(422).json({ message: "Email ou mot de pass invalide" });
+            }
+            if (!(await bcrypt.compare(password, data.password))) {
+                // en vrai on sait que c'est le mot qui est faux (chut: "silent is golden")
+                return res.status(422).json({ message: "Email ou mot de pass invalide" });
+            }
+
+            // Génération du JWT
+            jwt.sign({ userId: data._id }, process.env.SECRET, { expiresIn: "1h" }, (err, token) => {
+                if (err) {
+                    return res.status(500).json({ message: "Une erreur s'est produite" });
+                }
+                return res.status(200).json({ message: "You are now logged in :P", user: data, token });
+            });
         });
     },
 
@@ -69,10 +95,20 @@ const registerPost = {
      * mais oui sans doute un ID (mais pas directement celui du user (trop simple :/ ))
      */
     profilDataGet: (req, res, next) => {
-        let valeurClefPourTrouverLeUser = req.body.email;
+        // Récupération du token dans le header Authoriztion
+        const token = req.get("Authorization");
 
-        user.findOne({ email: valeurClefPourTrouverLeUser }, (error, data) => {
-            res.status(200).json(data);
+        // Vérification de la validité du token
+        jwt.verify(token, process.env.SECRET, (error, decoded) => {
+            // Token invalide
+            if (error) {
+                return res.status(401).json({ message: "Token invalide" });
+            }
+
+            // Recherche de l'utilisateur à partir du userId présent dans le token
+            User.findOne({ _id: decoded.userId }, (data) => {
+                res.status(200).json(data);
+            });
         });
     },
 
@@ -82,7 +118,7 @@ const registerPost = {
         let newValueNaissance = req.body.naissance;
         let newValuePseudo = req.body.pseudo;
 
-        user.updateOne(
+        User.updateOne(
             { nom: newValueNom, prenom: newValuePrenom, naissance: newValueNaissance, pseudo: newValuePseudo },
             (error, data) => {
                 if (error) {
