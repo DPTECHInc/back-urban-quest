@@ -179,7 +179,7 @@ Requête:
 ```json
 {
     "id": "String", // Id du post à commenter
-    "text": "String" // le jolie commentaire
+    "comment": "String" // le jolie commentaire
 }
 ```
 
