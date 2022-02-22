@@ -7,6 +7,7 @@ const PostSchema = new mongoose.Schema({
     location: String,
     likes: { type: Number, default: 0 },
     comments: { type: Array, default: [] },
+    img: String,
     // pictures: ,
     // https://mongoosejs.com/docs/schematypes.html
     updated: { type: Date, default: Date.now },
