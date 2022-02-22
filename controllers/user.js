@@ -3,6 +3,8 @@ var router = express.Router();
 var User = require("../model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const user = require("../model/user");
+const app = require("../app");
 
 const registerPost = {
     register: async (req, res, next) => {
@@ -83,7 +85,7 @@ const registerPost = {
                 if (err) {
                     return res.status(500).json({ message: "Une erreur s'est produite" });
                 }
-                return res.status(200).json({ message: "You are now logged in :P", user: data, token });
+                return res.status(200).json({ message: "You are now logged in", user: data, token });
             });
         });
     },
@@ -105,31 +107,60 @@ const registerPost = {
                 return res.status(401).json({ message: "Token invalide" });
             }
 
+            console.log(decoded);
+
             // Recherche de l'utilisateur à partir du userId présent dans le token
-            User.findOne({ _id: decoded.userId }, (data) => {
+            User.findOne({ _id: decoded.userId }, (err, data) => {
+                console.log(data);
                 res.status(200).json(data);
             });
         });
     },
 
     profilDataPut: (req, res, next) => {
-        let newValueNom = req.body.nom;
-        let newValuePrenom = req.body.prenom;
-        let newValueNaissance = req.body.naissance;
-        let newValuePseudo = req.body.pseudo;
+        //METHODE 1
 
-        User.updateOne(
-            { nom: newValueNom, prenom: newValuePrenom, naissance: newValueNaissance, pseudo: newValuePseudo },
-            (error, data) => {
-                if (error) {
-                    res.status(500).json({ message: "Une erreur s'est produite" });
-                } else if (data === null) {
-                    res.status(422).json({ message: "L'un des champ requis est vide" });
-                } else {
-                    res.status(200).json({ message: "Votre profil a bien été modifié", ProfilUpdated: req.body });
-                }
+        // let newValueNom = req.body.nom;
+        // let newValuePrenom = req.body.prenom;
+        // let newValueNaissance = req.body.naissance;
+        // let newValuePseudo = req.body.pseudo;
+
+        // // récupérer l'id dans le token :)
+
+        // User.updateOne( {_id: id},
+        //     {$set: { nom: newValueNom, prenom: newValuePrenom, naissance: newValueNaissance, pseudo: newValuePseudo }},
+        //     (error, data) => {
+        //         if (error) {
+        //             res.status(500).json({ message: "Une erreur s'est produite" });
+        //         } else if (data === null) {
+        //             res.status(422).json({ message: "L'un des champ requis est vide" });
+        //         } else {
+        //             res.status(200).json({ message: "Votre profil a bien été modifié", ProfilUpdated: req.body });
+        //         }
+        //     }
+        // );
+
+        //METHODE 2
+
+        const { nom, prenom, naissance, pseudo } = req.body;
+        const token = req.get("Authorization").split(" ")[1];
+
+        jwt.verify(token, "querty-1234", async (err, decoded) => {
+            if (err) {
+                res.status(500).json({ message: "Une erreur s'est produite" });
+                return;
             }
-        );
+            const user = await User.findOne({ _id: decoded.userId });
+            if (!user) {
+                res.status(401).json({ message: " Votre nom d'utilisateur est invalide " });
+                return;
+            }
+            user.nom = nom;
+            user.prenom = prenom;
+            user.naissance = naissance;
+            user.pseudo = pseudo;
+            await user.save();
+        });
     },
 };
 
